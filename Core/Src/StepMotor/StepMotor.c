@@ -7,7 +7,7 @@
  *============================================================================================================================
  *                                                   Revision control History
  *============================================================================================================================
- * V1.0.0: 2023-09-01: Initial Version
+ * V1.0.0: 2023-09-19: Initial Version
  *
  *
  *
@@ -17,7 +17,6 @@
  * Other Header File Inclusion
  ****************************************************************************************************************************/
 #include "StepMotor.h"
-#include "../Scheduler/Task.h"
 
 /*****************************************************************************************************************************
  * Macro Definition
@@ -38,6 +37,8 @@
 /*****************************************************************************************************************************
  * Table Constant Definition
  ****************************************************************************************************************************/
+const uint8_t PhaseTable[17] = {ACC_STEP_0,ACC_STEP_1,ACC_STEP_2,ACC_STEP_3,ACC_STEP_4,ACC_STEP_5,ACC_STEP_6,ACC_STEP_7,
+                     CONST_STEP,DEC_STEP_0,DEC_STEP_1,DEC_STEP_2,DEC_STEP_3,DEC_STEP_4,DEC_STEP_5,DEC_STEP_6,DEC_STEP_7};
 
 /*****************************************************************************************************************************
  * Static Local Functions Declaration
@@ -52,14 +53,76 @@
 /*****************************************************************************************************************************
  *                                                                  Function Source code
  ****************************************************************************************************************************/
-
+ void RunOnePhase(void)
+ {
+	if(mKeySta.nowKeySta == OPEN_DOOR) {  //正向
+		mDoorSta.phase++;
+		mDoorSta.nowDoorPosition++;
+	}
+	else if(mKeySta.nowKeySta == CLOSE_DOOR) {//反向
+		mDoorSta.phase--;
+		if(mDoorSta.nowDoorPosition > 0)
+			mDoorSta.nowDoorPosition--;
+	}
+	mDoorSta.phase = mDoorSta.phase % PHASE_MAX;
+	setPhaseMotor(mDoorSta.phase);
+ }
 
 /*****************************************************************************************************************************
- * StepMotorCtrl
+ * StepMotorCtrl  constant  4 per for 1 phase of 700pps
+  The 0.3581 degree is 1mm, The 9.5 steps are 1mm too.So ACC and DEC are 8 steps.
  ****************************************************************************************************************************/
 void StepMotorCtrl(void)
 {
-	//do something
+	//do something	
+	mCount.motor++;
+	mInputSta = getAllInputSta();
+	if(mKeySta.newKeyCmd == VALID) {
+		//Do something for newKeyCmd
+		//Set new value to mDoorSta
+		
+	}
+	else {
+		//Noting
+	}
+	
+	if(mCount.motor >= PhaseTable[mDoorSta.speedStep]) {
+		switch (mDoorSta.speedSta)
+		{
+			case ACCELERATION:
+				mDoorSta.speedStep++;
+				if(mDoorSta.speedStep >= 8) {
+					mDoorSta.speedSta = CONSTANT;
+					mDoorSta.speedStep = 8;
+				}
+				RunOnePhase();
+				break;
+			case CONSTANT:
+				if((mKeySta.nowKeySta == OPEN_DOOR) && (mDoorSta.nowDoorPosition <= (mDoorSta.nextDoorPosition - DEC_STEP_MAX)))
+					mDoorSta.speedSta = DECELERATION;
+				if((mKeySta.nowKeySta == CLOSE_DOOR) && (mDoorSta.nowDoorPosition <= (mDoorSta.nextDoorPosition + DEC_STEP_MAX)))
+					mDoorSta.speedSta = DECELERATION;
+				RunOnePhase();
+				break;
+			case DECELERATION:
+				mDoorSta.speedStep++;
+				if(mDoorSta.speedStep >= 16) {
+					mDoorSta.speedSta = HOLD;
+					mDoorSta.speedStep = 16;
+				}
+				RunOnePhase();
+				break;
+			case HOLD:
+				mDoorSta.speedStep = 0;
+				break;
+			default:
+				break;
+		}
+		mCount.motor = 0;
+	}
+	//maincontrol set direction
+	//本函数记录目前门板的具体位置（0~10000 就是具体位置），方向（目前方向和未来的方向，如果未来方向和本次目前方向不一致，要等减速完成后再换向），加减速匀速状态，
+	//如果还没到极限位置就检测到到位信号，则立刻减速。关门，并重新置相关变量。如位置信号到mDoorPosition = 0
 }
 
 

@@ -7,7 +7,7 @@
  *============================================================================================================================
  *                                                   Revision control History
  *============================================================================================================================
- * V1.0.0: 2023-09-01: Initial Version
+ * V1.0.0: 2023-09-19: Initial Version
  *
  *
  *
@@ -21,12 +21,6 @@
 #include "stm32g0xx_hal.h"
 #include "gpio.h"
 
-typedef struct COUNT
-{
-  uint32_t delay10ms;
-  uint32_t key;
-  uint32_t agingTest;
-}stCOUNT;
 /*****************************************************************************************************************************
  * Compile Option or configuration Section (for/debug)                                                
  ****************************************************************************************************************************/
@@ -34,6 +28,17 @@ typedef struct COUNT
 /*****************************************************************************************************************************
  * Macro Definition
  ****************************************************************************************************************************/
+#define OPEN_DOOR                       0
+#define CLOSE_DOOR                      1
+#define UNCERTAIN                       2
+
+#define INVALID                         0
+#define VALID                           1
+
+#define DELAY_150MS                     15
+#define HOME_POSITION                   0
+#define FARTHEST_POSITION               1460    //55
+
 
 /*****************************************************************************************************************************
  * Enumeration Definition
@@ -42,6 +47,31 @@ typedef struct COUNT
 /*****************************************************************************************************************************
  * Typedef Definition
  ****************************************************************************************************************************/
+typedef struct COUNT
+{
+  uint32_t delay10ms;
+  uint32_t key;
+  uint32_t agingCheck;
+  uint32_t motor;
+}stCOUNT;
+
+typedef struct DOOR_STA
+{
+  uint16_t nowDoorPosition;
+  uint16_t nextDoorPosition;
+  uint8_t toggleDirectionSta;
+  uint8_t runSta;
+  uint8_t speedSta;
+  uint8_t speedStep;
+  uint8_t phase;
+}stDOOR_STA;
+
+typedef struct KEY_STA
+{
+  uint8_t newKeyCmd;
+  uint8_t nowKeySta;
+  uint8_t nextKeySta;
+}stKEY_STA;
 
 /*****************************************************************************************************************************
  * Table Definition
@@ -50,12 +80,14 @@ typedef struct COUNT
 /*****************************************************************************************************************************
  * Global Function Prototypes
  ****************************************************************************************************************************/
-extern stINPUT_STA mInputSta = {GPIO_PIN_RESET};
-extern stCOUNT mCount = {0};
-extern uint8_t mNewKeyCmd = 0;
-extern uint8_t mKeyStatus = 0;
-extern void MainControl(void);
+extern stINPUT_STA mInputSta;
+extern stCOUNT mCount;
+extern stDOOR_STA mDoorSta;
+extern stKEY_STA mKeySta;
 
+extern void MainControl(void);
+extern void StartFan(void);
+extern void StopFan(void);
 #endif
 /*****************************************************************************************************************************
  * END OF FILE: StepMotor.h

@@ -18,7 +18,7 @@
   *============================================================================================================================
   *                                                   Revision control History
   *============================================================================================================================
-  * V1.0.0: 2023-09-01: Initial Version  357.1us for 2800HZ
+  * V1.0.0: 2023-09-19: Initial Version  357.1us for 2800HZ
 **/
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -26,7 +26,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "./Scheduler/Sch.h"
-// extern __IO  uint32_t mTimerStatus;
+
 uint32_t mOSTM14_SysTick357us;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {

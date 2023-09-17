@@ -7,7 +7,7 @@
  *============================================================================================================================
  *                                                   Revision control History
  *============================================================================================================================
- * V1.0.0: 2023-09-01: Initial Version
+ * V1.0.0: 2023-09-19: Initial Version
  *
  *
  *
@@ -20,8 +20,8 @@
 #include "../Scheduler/Task.h"
 stINPUT_STA mInputSta = {GPIO_PIN_RESET};
 stCOUNT mCount = {0};
-uint8_t mNewKeyCmd = 0;
-uint8_t mKeyStatus = 0;
+stDOOR_STA mDoorSta = {HOME_POSITION, HOME_POSITION, UNCOMPLETE, STOP_MOTOR, HOLD, 0, PHASE_0};
+stKEY_STA mKeySta = {INVALID, UNCERTAIN, UNCERTAIN};
 /*****************************************************************************************************************************
  * Macro Definition
  ****************************************************************************************************************************/
@@ -42,6 +42,7 @@ uint8_t mKeyStatus = 0;
  * Table Constant Definition
  ****************************************************************************************************************************/
 
+
 /*****************************************************************************************************************************
  * Static Local Functions Declaration
  ****************************************************************************************************************************/
@@ -59,84 +60,95 @@ void MainControl(void)
 {
 	//do something
 	mCount.delay10ms++;
-	mInputSta = getAllInputSta();
-	if(mInputSta.start == GPIO_PIN_RESET && mKeyStatus != 0) {	//有新的气感闭合信号
+	if(mInputSta.start == GPIO_PIN_RESET && mKeySta.nowKeySta != OPEN_DOOR) {	//有新的气感闭合信号
 		mCount.key++;
-		if(mCount.key > 15) {	 //150ms去抖
+		if(mCount.key > DELAY_150MS) {	 //150ms去抖
 			mCount.key = 0;
-			mKeyStatus = 0;
-			mNewKeyCmd = 1;
-			mCount.agingTest = 0;
+			mKeySta.nextKeySta = OPEN_DOOR;
+			mKeySta.newKeyCmd = VALID;
+			mCount.agingCheck = 0;
 		}
 	}
-	else if(mInputSta.start == GPIO_PIN_SET && mKeyStatus != 1)
+	else if(mInputSta.start == GPIO_PIN_SET && mKeySta.nowKeySta != CLOSE_DOOR)
 	{
 		mCount.key++;
-		if(mCount.key > 15) {	 //150ms去抖
+		if(mCount.key > DELAY_150MS) {	 //150ms去抖
 			mCount.key = 0;
-			mKeyStatus = 1;
-			mNewKeyCmd = 1;
-			mCount.agingTest = 0;
+			mKeySta.nextKeySta = CLOSE_DOOR;
+			mKeySta.newKeyCmd = VALID;
+			mCount.agingCheck = 0;
 		}
 	}
 	else{
 		mCount.key = 0;
 	}
-	if(mNewKeyCmd == 1) {
-		mNewKeyCmd = 0;
+	if(mKeySta.newKeyCmd == VALID && mDoorSta.toggleDirectionSta == UNCOMPLETE) {
+		mKeySta.newKeyCmd = INVALID;
+		mDoorSta.toggleDirectionSta = COMPLETE;
+		//Init variable
 	}
-	if(mKeyStatus == 0) {
-		
+	if(mKeySta.nowKeySta == OPEN_DOOR) {	//闭合气感信号，要求开窗
+		StartFan();
 	}
 	else {
+		StopFan();
+	}
+	// switch (mRunSta)
+	// {
+	// 	case 3:
+	// 		CloseWindows();		//关闭百叶窗
+	// 		FAN_OFF;
+	// 		windowsSta = CLOSEING;
+	// 		fsm++;
+	// 		fsmDelay = 0;
+	// 		break;	
+	// 	case 4:
+	// 		fsmDelay++;
+	// 		if(fsmDelay>DC_CURRENT_FSMDELAY)
+	// 			fsm++;
+	// 		break;	
+	// 	case 5:
+	// 			if(doorlimSta[0] == 1 && doorlimSta[1] == 1 && doorlimSta[2] == 1) {
+	// 			fsmDelay = 0;
+	// 			fsm = 11;
+	// 		}
+	// 		break;
+	// 	case 7:
+	// 		backward();			//打开百叶窗
+	// 		FAN_ON;
+	// 		windowsSta = OPENING;
+	// 		fsm++;
+	// 		fsmDelay = 0;
+	// 		break;	
+	// 	case 8:
+	// 		fsmDelay++;
+	// 		if(fsmDelay>DC_CURRENT_FSMDELAY)
+	// 			fsm++;
+	// 		break;
+	// 	case 9:
+	// 			if(doorlimSta[0] == 1 && doorlimSta[1] == 1 && doorlimSta[2] == 1) {
+	// 			fsmDelay = 0;
+	// 			fsm = 10;
+	// 		}
+	// 		break;
+	// 	case 6:
+	// 	case 10:
+	// 	case 11:
+	// 		stop();
+	// 		break;
+	// default:
+	// 	break;
+	// }
+}
 
-	}
-	switch (mRunSta)
-	{
-		case 3:
-			CloseWindows();		//关闭百叶窗
-			FAN_OFF;
-			windowsSta = CLOSEING;
-			fsm++;
-			fsmDelay = 0;
-			break;	
-		case 4:
-			fsmDelay++;
-			if(fsmDelay>DC_CURRENT_FSMDELAY)
-				fsm++;
-			break;	
-		case 5:
-				if(doorlimSta[0] == 1 && doorlimSta[1] == 1 && doorlimSta[2] == 1) {
-				fsmDelay = 0;
-				fsm = 11;
-			}
-			break;
-		case 7:
-			backward();			//打开百叶窗
-			FAN_ON;
-			windowsSta = OPENING;
-			fsm++;
-			fsmDelay = 0;
-			break;	
-		case 8:
-			fsmDelay++;
-			if(fsmDelay>DC_CURRENT_FSMDELAY)
-				fsm++;
-			break;
-		case 9:
-				if(doorlimSta[0] == 1 && doorlimSta[1] == 1 && doorlimSta[2] == 1) {
-				fsmDelay = 0;
-				fsm = 10;
-			}
-			break;
-		case 6:
-		case 10:
-		case 11:
-			stop();
-			break;
-	default:
-		break;
-	}
+void StartFan(void)
+{
+
+}
+
+void StopFan(void)
+{
+	
 }
 /*****************************************************************************************************************************
  * END OF FILE: StepMotor.c

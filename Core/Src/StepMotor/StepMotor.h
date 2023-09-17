@@ -7,7 +7,7 @@
  *============================================================================================================================
  *                                                   Revision control History
  *============================================================================================================================
- * V1.0.0: 2023-09-01: Initial Version
+ * V1.0.0: 2023-09-19: Initial Version
  *
  *
  *
@@ -19,6 +19,9 @@
  * Other Header File Inclusion 
  ****************************************************************************************************************************/
 #include "stm32g0xx_hal.h"
+#include "gpio.h"
+#include "../Scheduler/Task.h"
+#include "../MainControl/MainControl.h"
 
 /*****************************************************************************************************************************
  * Compile Option or configuration Section (for/debug)                                                
@@ -28,6 +31,42 @@
  * Macro Definition
  ****************************************************************************************************************************/
 
+#define UNCOMPLETE                      0
+#define COMPLETE                        1
+
+#define STOP_MOTOR                      0
+#define RUN_MOTOR                       1
+
+#define ACCELERATION                    0
+#define DECELERATION                    1
+#define CONSTANT                        2
+#define HOLD                            3
+#define ACC_STEP_0                      42
+#define ACC_STEP_1                      26
+#define ACC_STEP_2                      17
+#define ACC_STEP_3                      12
+#define ACC_STEP_4                      8
+#define ACC_STEP_5                      7
+#define ACC_STEP_6                      6
+#define ACC_STEP_7                      5
+#define CONST_STEP                      4
+#define DEC_STEP_0                      5
+#define DEC_STEP_1                      6
+#define DEC_STEP_2                      7
+#define DEC_STEP_3                      8
+#define DEC_STEP_4                      12
+#define DEC_STEP_5                      17
+#define DEC_STEP_6                      26
+#define DEC_STEP_7                      42
+
+#define ACC_STEP_MAX                    8
+#define DEC_STEP_MAX                    8
+
+#define PHASE_0                         0
+#define PHASE_1                         1
+#define PHASE_2                         2
+#define PHASE_3                         3
+#define PHASE_MAX                       PHASE_3
 /*****************************************************************************************************************************
  * Enumeration Definition
  ****************************************************************************************************************************/
