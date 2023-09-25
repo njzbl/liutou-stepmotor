@@ -169,19 +169,19 @@ void setCurrentMotor(uint8_t val)
 {
     if(val == 0) {
           HAL_GPIO_WritePin(GPIOB, BI1_M_Pin|BI0_M_Pin|AI1_M_Pin
-                          |AI0_M_Pin, GPIO_PIN_RESET);
+                          |AI0_M_Pin, GPIO_PIN_SET);
     }
     else if(val == 30) {
-          HAL_GPIO_WritePin(GPIOB, BI0_M_Pin|AI0_M_Pin, GPIO_PIN_SET);
-          HAL_GPIO_WritePin(GPIOB, BI1_M_Pin|AI1_M_Pin, GPIO_PIN_RESET);
-    }
-    else if(val == 70) {
           HAL_GPIO_WritePin(GPIOB, BI1_M_Pin|AI1_M_Pin, GPIO_PIN_SET);
           HAL_GPIO_WritePin(GPIOB, BI0_M_Pin|AI0_M_Pin, GPIO_PIN_RESET);
     }
+    else if(val == 70) {
+          HAL_GPIO_WritePin(GPIOB, BI0_M_Pin|AI0_M_Pin, GPIO_PIN_SET);
+          HAL_GPIO_WritePin(GPIOB, BI1_M_Pin|AI1_M_Pin, GPIO_PIN_RESET);
+    }
     else if(val == 100) {
           HAL_GPIO_WritePin(GPIOB, BI1_M_Pin|BI0_M_Pin|AI1_M_Pin
-                          |AI0_M_Pin, GPIO_PIN_SET);
+                          |AI0_M_Pin, GPIO_PIN_RESET);
     }
 }
 
@@ -258,6 +258,18 @@ void setYL03Ctrl(uint8_t sta)
     else
         pinSta = GPIO_PIN_RESET;
     HAL_GPIO_WritePin(YL03_CTRL_GPIO_Port, YL03_CTRL_Pin, pinSta);
+}
+
+//sta == 1 set CTRL_EXT_EN_Pin  enable EXT_24V
+//sat == 0 reset CTRL_EXT_EN_Pin disable  EXT_24V
+void setExt24VCtrl(uint8_t sta)
+{
+    GPIO_PinState pinSta;
+    if(sta == 1)
+        pinSta = GPIO_PIN_SET;
+    else
+        pinSta = GPIO_PIN_RESET;
+    HAL_GPIO_WritePin(CTRL_EXT_EN_GPIO_Port, CTRL_EXT_EN_Pin, pinSta);
 }
 
 stINPUT_STA getAllInputSta(void)

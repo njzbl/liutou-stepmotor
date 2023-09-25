@@ -66,6 +66,7 @@ GPIO_PinState getStartSta(void);
 GPIO_PinState getYL02Sta(void);
 void setS1Ctrl(uint8_t sta);
 void setYL03Ctrl(uint8_t sta);
+void setExt24VCtrl(uint8_t sta);
 stINPUT_STA getAllInputSta(void);
 /* USER CODE END Prototypes */
 

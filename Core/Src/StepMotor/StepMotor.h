@@ -33,6 +33,7 @@
 
 #define UNCOMPLETE                      0
 #define COMPLETE                        1
+#define COMPLETE_HALF                   2
 
 #define STOP_MOTOR                      0
 #define RUN_MOTOR                       1
@@ -41,11 +42,11 @@
 #define DECELERATION                    1
 #define CONSTANT                        2
 #define HOLD                            3
-#define ACC_STEP_0                      42
-#define ACC_STEP_1                      26
-#define ACC_STEP_2                      17
-#define ACC_STEP_3                      12
-#define ACC_STEP_4                      8
+#define ACC_STEP_0                      14
+#define ACC_STEP_1                      14
+#define ACC_STEP_2                      14
+#define ACC_STEP_3                      14
+#define ACC_STEP_4                      14
 #define ACC_STEP_5                      7
 #define ACC_STEP_6                      6
 #define ACC_STEP_7                      5
@@ -53,11 +54,11 @@
 #define DEC_STEP_0                      5
 #define DEC_STEP_1                      6
 #define DEC_STEP_2                      7
-#define DEC_STEP_3                      8
-#define DEC_STEP_4                      12
-#define DEC_STEP_5                      17
-#define DEC_STEP_6                      26
-#define DEC_STEP_7                      42
+#define DEC_STEP_3                      14
+#define DEC_STEP_4                      14
+#define DEC_STEP_5                      14
+#define DEC_STEP_6                      14
+#define DEC_STEP_7                      14
 
 #define ACC_STEP_MAX                    8
 #define DEC_STEP_MAX                    8
@@ -83,6 +84,7 @@
  * Global Function Prototypes
  ****************************************************************************************************************************/
 extern void StepMotorCtrl(void);
+extern void InitDrv8841(void);
 
 #endif
 /*****************************************************************************************************************************

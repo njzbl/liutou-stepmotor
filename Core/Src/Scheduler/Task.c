@@ -60,6 +60,8 @@
 void Task_Init(void)
 {
 	//do something
+	PrintfVersion();
+	InitDrv8841();
 	SCH_Delete_Task(0);
 }
 

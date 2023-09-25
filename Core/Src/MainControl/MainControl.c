@@ -20,7 +20,7 @@
 #include "../Scheduler/Task.h"
 stINPUT_STA mInputSta = {GPIO_PIN_RESET};
 stCOUNT mCount = {0};
-stDOOR_STA mDoorSta = {HOME_POSITION, HOME_POSITION, UNCOMPLETE, STOP_MOTOR, HOLD, 0, PHASE_0};
+stDOOR_STA mDoorSta = {HOME_POSITION, HOME_POSITION, UNCOMPLETE, UNCOMPLETE, HOLD, HOLD, 0, PHASE_0};
 stKEY_STA mKeySta = {INVALID, UNCERTAIN, UNCERTAIN};
 /*****************************************************************************************************************************
  * Macro Definition
@@ -52,9 +52,43 @@ stKEY_STA mKeySta = {INVALID, UNCERTAIN, UNCERTAIN};
  *                                                                  Function Source code
  ****************************************************************************************************************************/
 
+#pragma import(__use_no_semihosting)    //确保没有从C库链接使用半主机的函数，必须导入符号__use_no_semihosting
+void _sys_exit(int x)                   //定义_sys_exit()以避免使用半主机模式
+{
+  x = x;
+}
+struct __FILE                           //标准库需要的支持函数
+{
+  int handle;
+};
+/* FILE is typedefed in stdio.h*/
+FILE __stdout;
+FILE __stdin;
 
+/**
+  * @brief     重定义fputc函数（重定向c库函数putchar、printf到USART1）
+  * @param     ch - 字符
+               *f - 文件指针
+  * @retval    字符
+  * @attention 不能放在中断中使用，具体可参考网上相关资料
+  */
+
+
+int fputc(int ch, FILE *f)
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+  //while ((USART1->SR & UART_FLAG_TXE) == 0) {}  //等待数据发送完毕
+	while ((USART1->ISR & UART_FLAG_TXE) == 0) {}  //等待数据发送完毕
+  return ch;
+}
+
+void PrintfVersion(void)
+{
+	printf("Software Version: V1.00 20230920\r\n");
+
+}
 /*****************************************************************************************************************************
- * StepMotorCtrl
+ * MainControl
  ****************************************************************************************************************************/
 void MainControl(void)
 {
@@ -65,7 +99,7 @@ void MainControl(void)
 		if(mCount.key > DELAY_150MS) {	 //150ms去抖
 			mCount.key = 0;
 			mKeySta.nextKeySta = OPEN_DOOR;
-			mKeySta.newKeyCmd = VALID;
+			mKeySta.isNewKeyCmd = TRUE;
 			mCount.agingCheck = 0;
 		}
 	}
@@ -75,18 +109,18 @@ void MainControl(void)
 		if(mCount.key > DELAY_150MS) {	 //150ms去抖
 			mCount.key = 0;
 			mKeySta.nextKeySta = CLOSE_DOOR;
-			mKeySta.newKeyCmd = VALID;
+			mKeySta.isNewKeyCmd = TRUE;
 			mCount.agingCheck = 0;
 		}
 	}
 	else{
 		mCount.key = 0;
 	}
-	if(mKeySta.newKeyCmd == VALID && mDoorSta.toggleDirectionSta == UNCOMPLETE) {
-		mKeySta.newKeyCmd = INVALID;
-		mDoorSta.toggleDirectionSta = COMPLETE;
-		//Init variable
-	}
+	// if(mKeySta.isNewKeyCmd == TRUE && mDoorSta.toggleDirectionSta == UNCOMPLETE) {
+	// 	mKeySta.isNewKeyCmd = FALSE;
+	// 	mDoorSta.toggleDirectionSta = COMPLETE;
+	// 	//Init variable
+	// }
 	if(mKeySta.nowKeySta == OPEN_DOOR) {	//闭合气感信号，要求开窗
 		StartFan();
 	}
@@ -140,7 +174,9 @@ void MainControl(void)
 	// 	break;
 	// }
 }
-
+//风机输入端;低电平时间4us , 45us 一个周期 ，22KHZ  ，平时低电平
+//直角边 53 斜边109
+//FG 16MS 一个周期，50%占空比
 void StartFan(void)
 {
 

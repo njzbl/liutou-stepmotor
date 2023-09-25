@@ -20,6 +20,10 @@
  ****************************************************************************************************************************/
 #include "stm32g0xx_hal.h"
 #include "gpio.h"
+#include "usart.h"
+#include "string.h"
+#include "stdarg.h"
+#include "stdio.h"
 
 /*****************************************************************************************************************************
  * Compile Option or configuration Section (for/debug)                                                
@@ -35,9 +39,12 @@
 #define INVALID                         0
 #define VALID                           1
 
+#define TRUE                            1
+#define FALSE                           0
+
 #define DELAY_150MS                     15
 #define HOME_POSITION                   0
-#define FARTHEST_POSITION               1460    //55
+#define FARTHEST_POSITION               0xf460//1460    //55
 
 
 /*****************************************************************************************************************************
@@ -59,16 +66,17 @@ typedef struct DOOR_STA
 {
   uint16_t nowDoorPosition;
   uint16_t nextDoorPosition;
-  uint8_t toggleDirectionSta;
-  uint8_t runSta;
-  uint8_t speedSta;
-  uint8_t speedStep;
-  uint8_t phase;
+  uint8_t toggleDirSta;   //正向反向运动切换完成的标志 //toggleDirection
+  uint8_t toggleDirPreSta;   //正向反向运动切换预处理的标志
+  uint8_t runSta;               //open or close
+  uint8_t speedSta;             //ACC DEC HOLD ,上电默认是HOLD，然后根据按键来运动
+  uint8_t slowStep;             //ACC DEC 的步数
+  uint8_t phase;                //当前的相位
 }stDOOR_STA;
 
 typedef struct KEY_STA
 {
-  uint8_t newKeyCmd;
+  uint8_t isNewKeyCmd;
   uint8_t nowKeySta;
   uint8_t nextKeySta;
 }stKEY_STA;
@@ -85,6 +93,7 @@ extern stCOUNT mCount;
 extern stDOOR_STA mDoorSta;
 extern stKEY_STA mKeySta;
 
+extern void PrintfVersion(void);
 extern void MainControl(void);
 extern void StartFan(void);
 extern void StopFan(void);
