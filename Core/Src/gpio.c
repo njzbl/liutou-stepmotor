@@ -79,9 +79,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin PAPin PAPin
-                           PAPin PAPin */
+                           PAPin */
   GPIO_InitStruct.Pin = YL02_Pin|START_Pin|CHK_Pin|YL01_Pin
-                          |FAULT_M_Pin|FG_Pin;
+                          |FAULT_M_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -111,6 +111,16 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(FAN_CTRL_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = FG_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(FG_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+
 }
 
 /* USER CODE BEGIN 2 */
@@ -124,8 +134,6 @@ GPIO_PinState getFGSta(void)
     return  HAL_GPIO_ReadPin(FG_GPIO_Port, FG_Pin);
 }
 
-//sta == 1 fan run
-//sat == 0 fan stop
 void setFanCtrl(uint8_t sta)
 {
     GPIO_PinState pinSta;
@@ -188,20 +196,21 @@ void setCurrentMotor(uint8_t val)
 void setPhaseMotor(uint8_t val)
 {   
     if(val == 0) {
-          HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN1_M_Pin, GPIO_PIN_SET);
-          HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN2_M_Pin, GPIO_PIN_RESET);
+          HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN1_M_Pin, GPIO_PIN_SET);
+          HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN2_M_Pin, GPIO_PIN_RESET);
     }
     else if(val == 1) {
-          HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN2_M_Pin, GPIO_PIN_SET);
-          HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN1_M_Pin, GPIO_PIN_RESET);
-    }
-    else if(val == 2) {
           HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN2_M_Pin, GPIO_PIN_SET);
           HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN1_M_Pin, GPIO_PIN_RESET);
     }
+    else if(val == 2) {
+        
+          HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN2_M_Pin, GPIO_PIN_SET);
+          HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN1_M_Pin, GPIO_PIN_RESET);
+    }
     else {
-          HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN1_M_Pin, GPIO_PIN_SET);
-          HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN2_M_Pin, GPIO_PIN_RESET);
+          HAL_GPIO_WritePin(GPIOB, AIN1_M_Pin|BIN1_M_Pin, GPIO_PIN_SET);
+          HAL_GPIO_WritePin(GPIOB, AIN2_M_Pin|BIN2_M_Pin, GPIO_PIN_RESET);
     }
 }
 //sta == 1 set LED_EXT_Pin
@@ -275,7 +284,7 @@ void setExt24VCtrl(uint8_t sta)
 stINPUT_STA getAllInputSta(void)
 {
     stINPUT_STA inputsta;
-    inputsta.fg =  getFGSta();
+    // inputsta.fg =  getFGSta();
     inputsta.faultM =  getFaultMotorSta();
     inputsta.chk =  getChkSta();
     inputsta.start = getStartSta();

@@ -99,6 +99,7 @@ void Error_Handler(void);
 #define FAN_CTRL_GPIO_Port GPIOC
 #define FG_Pin GPIO_PIN_10
 #define FG_GPIO_Port GPIOA
+#define FG_EXTI_IRQn EXTI4_15_IRQn
 #define WDI_Pin GPIO_PIN_5
 #define WDI_GPIO_Port GPIOB
 

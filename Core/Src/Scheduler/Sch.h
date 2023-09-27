@@ -29,14 +29,14 @@
 #define TASK_INIT_DELAY				    (0)
 #define TASK_INIT_PERIOD				(0)
 
-#define TASK0_DELAY                     (2U)
-#define TASK0_PERIOD                    (1U)
+#define TASK1_DELAY                     (2U)    //2        //16
+#define TASK1_PERIOD                    (1U)    //1         //8
 
-#define TASK1_DELAY                     (27U)
-#define TASK1_PERIOD                    (27U)
+#define TASK2_DELAY                     (27U)   //27       //216
+#define TASK2_PERIOD                    (27U)   //27       //216
 
-#define TASK2_DELAY                     (560U)
-#define TASK2_PERIOD                    (560U)
+#define TASK3_DELAY                     (560U)  //560       //4480
+#define TASK3_PERIOD                    (560U)  //560       //4480
 
 
 /*****************************************************************************************************************************

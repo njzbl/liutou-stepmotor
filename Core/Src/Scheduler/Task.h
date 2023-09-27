@@ -48,7 +48,8 @@
  * Global Function Prototypes
  ****************************************************************************************************************************/
 extern void Task_Init(void);
-extern void Task_Step_Ctrl(void);
+extern void Task_Fan_Ctrl(void);
+extern void Task_Motor_Ctrl(void);
 extern void Task_10ms(void);
 extern void Task_200ms(void);
 

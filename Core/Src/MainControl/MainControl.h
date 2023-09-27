@@ -42,9 +42,12 @@
 #define TRUE                            1
 #define FALSE                           0
 
+#define RUN                             1
+#define STOP                            0
+
 #define DELAY_150MS                     15
 #define HOME_POSITION                   0
-#define FARTHEST_POSITION               0xf460//1460    //55
+#define FARTHEST_POSITION               1470//55°     1253  //47°      1120  //42°  1066  // 40°     770   //29°    0xf460 
 
 
 /*****************************************************************************************************************************
@@ -60,6 +63,7 @@ typedef struct COUNT
   uint32_t key;
   uint32_t agingCheck;
   uint32_t motor;
+  uint32_t fan;
 }stCOUNT;
 
 typedef struct DOOR_STA
@@ -95,6 +99,7 @@ extern stKEY_STA mKeySta;
 
 extern void PrintfVersion(void);
 extern void MainControl(void);
+extern void FanCtrl(void);
 extern void StartFan(void);
 extern void StopFan(void);
 #endif

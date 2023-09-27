@@ -77,8 +77,7 @@ FILE __stdin;
 int fputc(int ch, FILE *f)
 {
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
-  //while ((USART1->SR & UART_FLAG_TXE) == 0) {}  //等待数据发送完毕
-	while ((USART1->ISR & UART_FLAG_TXE) == 0) {}  //等待数据发送完毕
+	while ((USART1->ISR & UART_FLAG_TXE) == 0) {}
   return ch;
 }
 
@@ -87,6 +86,14 @@ void PrintfVersion(void)
 	printf("Software Version: V1.00 20230920\r\n");
 
 }
+
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+  /* NOTE: This function should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Rising_Callback could be implemented in the user file
+   */
+}
+
 /*****************************************************************************************************************************
  * MainControl
  ****************************************************************************************************************************/
@@ -94,7 +101,7 @@ void MainControl(void)
 {
 	//do something
 	mCount.delay10ms++;
-	if(mInputSta.start == GPIO_PIN_RESET && mKeySta.nowKeySta != OPEN_DOOR) {	//有新的气感闭合信号
+	if(mInputSta.start == GPIO_PIN_RESET && mKeySta.nowKeySta != OPEN_DOOR) {
 		mCount.key++;
 		if(mCount.key > DELAY_150MS) {	 //150ms去抖
 			mCount.key = 0;
@@ -116,67 +123,22 @@ void MainControl(void)
 	else{
 		mCount.key = 0;
 	}
-	// if(mKeySta.isNewKeyCmd == TRUE && mDoorSta.toggleDirectionSta == UNCOMPLETE) {
-	// 	mKeySta.isNewKeyCmd = FALSE;
-	// 	mDoorSta.toggleDirectionSta = COMPLETE;
-	// 	//Init variable
-	// }
 	if(mKeySta.nowKeySta == OPEN_DOOR) {	//闭合气感信号，要求开窗
-		StartFan();
+		setFanCtrl(0);		//100%   占空比
 	}
 	else {
-		StopFan();
+		setFanCtrl(1);		//0% 	占空比
 	}
-	// switch (mRunSta)
-	// {
-	// 	case 3:
-	// 		CloseWindows();		//关闭百叶窗
-	// 		FAN_OFF;
-	// 		windowsSta = CLOSEING;
-	// 		fsm++;
-	// 		fsmDelay = 0;
-	// 		break;	
-	// 	case 4:
-	// 		fsmDelay++;
-	// 		if(fsmDelay>DC_CURRENT_FSMDELAY)
-	// 			fsm++;
-	// 		break;	
-	// 	case 5:
-	// 			if(doorlimSta[0] == 1 && doorlimSta[1] == 1 && doorlimSta[2] == 1) {
-	// 			fsmDelay = 0;
-	// 			fsm = 11;
-	// 		}
-	// 		break;
-	// 	case 7:
-	// 		backward();			//打开百叶窗
-	// 		FAN_ON;
-	// 		windowsSta = OPENING;
-	// 		fsm++;
-	// 		fsmDelay = 0;
-	// 		break;	
-	// 	case 8:
-	// 		fsmDelay++;
-	// 		if(fsmDelay>DC_CURRENT_FSMDELAY)
-	// 			fsm++;
-	// 		break;
-	// 	case 9:
-	// 			if(doorlimSta[0] == 1 && doorlimSta[1] == 1 && doorlimSta[2] == 1) {
-	// 			fsmDelay = 0;
-	// 			fsm = 10;
-	// 		}
-	// 		break;
-	// 	case 6:
-	// 	case 10:
-	// 	case 11:
-	// 		stop();
-	// 		break;
-	// default:
-	// 	break;
-	// }
+}
+
+void FanCtrl(void)
+{
 }
 //风机输入端;低电平时间4us , 45us 一个周期 ，22KHZ  ，平时低电平
 //直角边 53 斜边109
 //FG 16MS 一个周期，50%占空比
+
+//108  //56+14 = 70
 void StartFan(void)
 {
 

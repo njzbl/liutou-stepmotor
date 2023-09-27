@@ -54,9 +54,9 @@ void SCH_Init(void)
         SCH_Delete_Task(index);
     }
     (void)SCH_Add_Task(Task_Init, TASK_INIT_DELAY, TASK_INIT_PERIOD);
-    (void)SCH_Add_Task(Task_Step_Ctrl,    TASK0_DELAY, TASK0_PERIOD);
-    (void)SCH_Add_Task(Task_10ms,    TASK1_DELAY, TASK1_PERIOD);
-    (void)SCH_Add_Task(Task_200ms,   TASK2_DELAY, TASK2_PERIOD);
+    (void)SCH_Add_Task(Task_Motor_Ctrl,    TASK1_DELAY, TASK1_PERIOD);
+    (void)SCH_Add_Task(Task_10ms,    TASK2_DELAY, TASK2_PERIOD);
+    (void)SCH_Add_Task(Task_200ms,   TASK3_DELAY, TASK3_PERIOD);
 }
 
 /*****************************************************************************************************************************
