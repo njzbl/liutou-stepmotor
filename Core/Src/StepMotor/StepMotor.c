@@ -66,7 +66,7 @@ const uint8_t PhaseTable[17] = {ACC_STEP_0,ACC_STEP_1,ACC_STEP_2,ACC_STEP_3,ACC_
 		if(mDoorSta.nowDoorPosition > 0)
 			mDoorSta.nowDoorPosition--;
 	}
-	mDoorSta.phase = mDoorSta.phase % PHASE_MAX;
+	mDoorSta.phase = mDoorSta.phase % (PHASE_MAX + 1);
 	setPhaseMotor(mDoorSta.phase);
  }
 
